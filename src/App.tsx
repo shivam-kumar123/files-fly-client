@@ -15,6 +15,7 @@ const App = () => {
   const [showQR, SetShowQR] = useState<boolean>(false);
   const [btnText, SetBtnText] = useState<string>('Show');
   const [showLoader, SetShowLoader] = useState<boolean>(false);
+  const [serverMsg, SetServerMsg] = useState<string | null>(null);
 
   const UploadFileToServer = async (event: React.MouseEvent<HTMLButtonElement>) => {
     const formData = new FormData();
@@ -32,9 +33,14 @@ const App = () => {
       setTimeout(async () => {
         SetFileDownloadUrl('');
         await axios.delete(`${process.env.REACT_APP_SERVER}/delete/${res.data.fileId}`);
-      }, 300000);
+      }, 200000);
     } catch (error) {
+      SetServerMsg('Server is overloaded, try again in some time, refreshing in 10 seconds ...');
       console.error('Error uploading file:', error);
+      setTimeout(() => {
+        window.location.reload();
+      }, 10000);
+
     }
   }
   
@@ -89,7 +95,7 @@ const App = () => {
         fileDownloadUrl !== '' && fileData === null && showLoader === false &&
         <div>
           <p>Download <strong>{fetchedFileName}</strong> File From given URL or scan QR code to download the file</p>
-          <p>file can be downloaded within <strong>5 minutes</strong> of upload Only</p>
+          <p>file can be downloaded within <strong>3 minutes</strong> of upload Only</p>
           <a href={fileDownloadUrl} className="download-link" download>
           <FaDownload /> Download File
           </a>
@@ -110,6 +116,10 @@ const App = () => {
       {
         showLoader && 
         <Loader />
+      }
+      {
+        serverMsg !== null && 
+        <h2 className='text-red-500'>{serverMsg}</h2>
       }
     </div>
   );
