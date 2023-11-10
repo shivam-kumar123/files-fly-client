@@ -114,7 +114,7 @@ const App = () => {
         </div>
       }
       {
-        showLoader && 
+        showLoader && serverMsg === null &&
         <Loader />
       }
       {
