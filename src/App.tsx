@@ -4,26 +4,29 @@ import './App.css';
 import axios from 'axios';
 import './Input.css'
 import { FaCopy, FaDownload } from 'react-icons/fa';
+import Loader from './components/Loader'
 
 const App = () => {
 
-  const [fileName, SetFileName] = useState<string>('Click to upload image');
+  const [fileName, SetFileName] = useState<string>('Click to upload upto 200 MB');
   const [fileData, SetFileData] = useState<File | null>(null);
   const [fileDownloadUrl, SetFileDownloadUrl] = useState<string>('');
   const [fetchedFileName , SetFetchedFileName] = useState<string>('');
   const [showQR, SetShowQR] = useState<boolean>(false);
   const [btnText, SetBtnText] = useState<string>('Show');
+  const [showLoader, SetShowLoader] = useState<boolean>(false);
 
   const UploadFileToServer = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    if(fileData === null) return;
     const formData = new FormData();
     formData.append('file', fileData as File); 
     try {
+      SetFileData(null);
+      SetShowLoader(true);
       const res = await axios.post(`${process.env.REACT_APP_SERVER}/post`, formData);
+      SetShowLoader(false);
       SetFileDownloadUrl(res.data.downloadLink);
       SetFetchedFileName(fileName);
-      SetFileName('Click to upload image');
-      SetFileData(null);
+      SetFileName('Click to upload upto 200 MB');
       SetShowQR(false);
       
       setTimeout(async () => {
@@ -43,7 +46,7 @@ const App = () => {
       SetFileData(files[0]);
     } else {
       // If no file is selected, reset the state
-      SetFileName('Click to upload image');
+      SetFileName('Click to upload upto 200 MB');
       SetFileData(null);
       SetShowQR(false);
     }
@@ -79,11 +82,11 @@ const App = () => {
         </label>
       </div>
       {
-        fileData !== null && 
+        fileData !== null && showLoader === false &&
         <button className="custom-button" onClick={UploadFileToServer}>Upload</button>
       }
       {
-        fileDownloadUrl !== '' && fileData === null &&
+        fileDownloadUrl !== '' && fileData === null && showLoader === false &&
         <div>
           <p>Download <strong>{fetchedFileName}</strong> File From given URL or scan QR code to download the file</p>
           <p>file can be downloaded within <strong>5 minutes</strong> of upload Only</p>
@@ -103,6 +106,10 @@ const App = () => {
             </div>
           }
         </div>
+      }
+      {
+        showLoader && 
+        <Loader />
       }
     </div>
   );
