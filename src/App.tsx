@@ -16,6 +16,7 @@ const App = () => {
   const [btnText, SetBtnText] = useState<string>('Show');
   const [showLoader, SetShowLoader] = useState<boolean>(false);
   const [serverMsg, SetServerMsg] = useState<string | null>(null);
+  const [fileSize, SetFileSize] = useState<number>(0);
 
   const UploadFileToServer = async (event: React.MouseEvent<HTMLButtonElement>) => {
     const formData = new FormData();
@@ -23,7 +24,7 @@ const App = () => {
     try {
       SetFileData(null);
       SetShowLoader(true);
-      const res = await axios.post(`${process.env.REACT_APP_SERVER}/post`, formData);
+      const res = await axios.post(`${process.env.REACT_APP_SERVER_DEVELOPMENT}/post`, formData);
       SetShowLoader(false);
       SetFileDownloadUrl(res.data.downloadLink);
       SetFetchedFileName(fileName);
@@ -32,7 +33,7 @@ const App = () => {
       
       setTimeout(async () => {
         SetFileDownloadUrl('');
-        await axios.delete(`${process.env.REACT_APP_SERVER}/delete/${res.data.fileId}`);
+        await axios.delete(`${process.env.REACT_APP_SERVER_DEVELOPMENT}/delete/${res.data.fileId}`);
       }, 200000);
     } catch (error) {
       SetServerMsg('Server is overloaded, try again in some time, refreshing in 10 seconds ...');
@@ -50,6 +51,11 @@ const App = () => {
     if (files.length > 0) {
       SetFileName(files[0].name);
       SetFileData(files[0]);
+      if (files[0].size <= 215000000) {
+        SetFileSize(files[0].size);
+      } else {
+        SetFileSize(0);
+      }
     } else {
       // If no file is selected, reset the state
       SetFileName('Click to upload upto 200 MB');
@@ -88,8 +94,15 @@ const App = () => {
         </label>
       </div>
       {
-        fileData !== null && showLoader === false &&
+        fileData !== null && showLoader === false && fileSize > 0 &&
         <button className="custom-button" onClick={UploadFileToServer}>Upload</button>
+      }
+      {
+        fileData !== null && fileSize === 0 && 
+        <div>
+          <h2>Upload Limit exceeded 200 MB</h2>
+          <h2>Select any other file</h2>
+        </div>
       }
       {
         fileDownloadUrl !== '' && fileData === null && showLoader === false &&
