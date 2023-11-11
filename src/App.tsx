@@ -24,7 +24,7 @@ const App = () => {
     try {
       SetFileData(null);
       SetShowLoader(true);
-      const res = await axios.post(`${process.env.REACT_APP_SERVER_DEVELOPMENT}/post`, formData);
+      const res = await axios.post(`${process.env.REACT_APP_SERVER}/post`, formData);
       SetShowLoader(false);
       SetFileDownloadUrl(res.data.downloadLink);
       SetFetchedFileName(fileName);
@@ -33,7 +33,7 @@ const App = () => {
       
       setTimeout(async () => {
         SetFileDownloadUrl('');
-        await axios.delete(`${process.env.REACT_APP_SERVER_DEVELOPMENT}/delete/${res.data.fileId}`);
+        await axios.delete(`${process.env.REACT_APP_SERVER}/delete/${res.data.fileId}`);
       }, 200000);
     } catch (error) {
       SetServerMsg('Server is overloaded, try again in some time, refreshing in 10 seconds ...');
